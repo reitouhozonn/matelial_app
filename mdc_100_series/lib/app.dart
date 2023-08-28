@@ -13,9 +13,11 @@
 // limitations under the License.
 
 import 'package:flutter/material.dart';
+import 'supplemental/cut_corners_border.dart';
 
 import 'home.dart';
 import 'login.dart';
+import 'colors.dart';
 
 // TODO: Convert ShrineApp to stateful widget (104)
 class ShrineApp extends StatelessWidget {
@@ -34,11 +36,60 @@ class ShrineApp extends StatelessWidget {
         // TODO: Pass _currentCategory for frontLayer (104)
         // TODO: Change backLayer field value to CategoryMenuPage (104)
       },
-      // TODO: Customize the theme (103)
-      theme: ThemeData.light(useMaterial3: true),
+      theme: _kShirineTheme,
     );
   }
 }
 
-// TODO: Build a Shrine Theme (103)
+final ThemeData _kShirineTheme = _buildShirineTheme();
+
+ThemeData _buildShirineTheme() {
+  final ThemeData base = ThemeData.light();
+
+  return base.copyWith(
+    colorScheme: base.colorScheme.copyWith(
+      primary: kShrinePink100,
+      onPrimary: kShrineBrown900,
+      secondary: kShrineBrown900,
+      error: kShrineErrorRed,
+    ),
+    inputDecorationTheme: const InputDecorationTheme(
+      border: OutlineInputBorder(),
+      focusedBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          width: 2.0,
+          color: kShrineBrown900,
+        ),
+      ),
+      floatingLabelStyle: TextStyle(
+        color: kShrineBrown900,
+      ),
+    ),
+  );
+}
+
 // TODO: Build a Shrine Text Theme (103)
+TextTheme _buildShrineTextTheme(TextTheme base) {
+  return base
+      .copyWith(
+        headlineMedium: base.headlineMedium!.copyWith(
+          fontWeight: FontWeight.w500,
+        ),
+        headline6: base.headline6!.copyWith(
+          fontSize: 18.0,
+        ),
+        caption: base.caption!.copyWith(
+          fontWeight: FontWeight.w400,
+          fontSize: 14.0,
+        ),
+        bodyText1: base.bodyText1!.copyWith(
+          fontWeight: FontWeight.w500,
+          fontSize: 16.0,
+        ),
+      )
+      .apply(
+        fontFamily: 'Rubik',
+        displayColor: kShrineBrown900,
+        bodyColor: kShrineBrown900,
+      );
+}
