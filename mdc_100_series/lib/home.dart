@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'supplemental/asymmetric_view.dart';
 
 import 'model/product.dart';
 import 'model/products_repository.dart';
@@ -79,38 +80,43 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // TODO: Return an AsymmetricView (104)
+    return AsymmetricView(
+        products: ProductsRepository.loadProducts(Category.all));
     // TODO: Pass Category variable to AsymmetricView (104)
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('SHRINE'),
-          actions: [
-            IconButton(
-              onPressed: () {
-                print('icon button');
-              },
-              icon: const Icon(
-                Icons.menu,
-                semanticLabel: 'menu',
-              ),
+      appBar: AppBar(
+        title: const Text('SHRINE'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              print('icon button');
+            },
+            icon: const Icon(
+              Icons.menu,
+              semanticLabel: 'menu',
             ),
-            IconButton(
-              onPressed: () {
-                print('Filter Button');
-              },
-              icon: const Icon(
-                Icons.menu,
-                semanticLabel: 'filter',
-              ),
+          ),
+          IconButton(
+            onPressed: () {
+              print('Filter Button');
+            },
+            icon: const Icon(
+              Icons.menu,
+              semanticLabel: 'filter',
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
 
-        // TODO: Add a grid view (102)
-        body: GridView.count(
-          crossAxisCount: 2,
-          padding: const EdgeInsets.all(16.0),
-          childAspectRatio: 8.0 / 9.0,
-          children: _buildGridCard(context),
-        ));
+      // TODO: Add a grid view (102)
+      // body: GridView.count(
+      //   crossAxisCount: 2,
+      //   padding: const EdgeInsets.all(16.0),
+      //   childAspectRatio: 8.0 / 9.0,
+      //   children: _buildGridCard(context),
+      // )
+      body: AsymmetricView(
+          products: ProductsRepository.loadProducts(Category.all)),
+    );
   }
 }
