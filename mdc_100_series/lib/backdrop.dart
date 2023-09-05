@@ -2,10 +2,43 @@ import 'package:flutter/material.dart';
 
 import 'model/product.dart';
 
+const double _kFlingVelocity = 2.0;
+
 // TODO: Add velocity constant (104)
 class _BackdropState extends State<Backdrop>
     with SingleTickerProviderStateMixin {
   final GlobalKey _backdropKey = GlobalKey(debugLabel: 'Backdrop');
+  late AnimationController _controller;
+  // TODO: Add AnimationController widget (104)
+  // TODO: Add override for didUpdateWidget (104)
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      value: 1.0,
+      duration: const Duration(milliseconds: 300),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  // TODO: Add functions to get and change front layer visibility (104)
+  bool get _FrontLayerVisible {
+    final AnimationStatus status = _controller.status;
+    return status == AnimationStatus.completed ||
+        status == AnimationStatus.forward;
+  }
+
+  void _toggleBackdropLayerVisibility() {
+    _controller.fling(
+        velocity: _FrontLayerVisible ? -_kFlingVelocity : _kFlingVelocity);
+  }
 
   Widget _buildStack() {
     return Stack(
