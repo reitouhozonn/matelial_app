@@ -40,12 +40,30 @@ class _BackdropState extends State<Backdrop>
         velocity: _FrontLayerVisible ? -_kFlingVelocity : _kFlingVelocity);
   }
 
-  Widget _buildStack() {
+  Widget _buildStack(BuildContext context, BoxConstraints constraints) {
+    const double layerTitleHeight = 48.0;
+    final Size layerSize = constraints.biggest;
+    final double layerTop = layerSize.height - layerTitleHeight;
+    // TODO: Create a RelativeRectTween Animation (104)
+
+    Animation<RelativeRect> layerAnimation = RelativeRectTween(
+      begin: RelativeRect.fromLTRB(
+          0.0, layerTop, 0.0, layerTop - layerSize.height),
+      end: const RelativeRect.fromLTRB(0.0, 0.0, 0.0, 0.0),
+    ).animate(_controller.view);
+
     return Stack(
       key: _backdropKey,
       children: [
-        widget.backLayer,
-        _FrontLayer(child: widget.frontLayer),
+        // TODO: Wrap backLayer in an ExcludeSemantics widget (104)]
+        ExcludeSemantics(
+          child: widget.backLayer,
+          excluding: _FrontLayerVisible,
+        ),
+        PositionedTransition(
+          rect: layerAnimation,
+          child: _FrontLayer(child: widget.frontLayer),
+        ),
       ],
     );
   }
@@ -55,7 +73,10 @@ class _BackdropState extends State<Backdrop>
     var appBar = AppBar(
       elevation: 0.0,
       titleSpacing: 0.0,
-      leading: Icon(Icons.menu),
+      leading: IconButton(
+        icon: const Icon(Icons.menu),
+        onPressed: _toggleBackdropLayerVisibility,
+      ),
       title: Text('SHRINE'),
       actions: [
         IconButton(
@@ -80,7 +101,7 @@ class _BackdropState extends State<Backdrop>
     );
     return Scaffold(
       appBar: appBar,
-      body: _buildStack(),
+      body: LayoutBuilder(builder: _buildStack),
     );
   }
 }
