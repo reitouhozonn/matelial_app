@@ -17,6 +17,7 @@ enum Category {
   accessories,
   clothing,
   home,
+  exit,
 }
 
 class Product {

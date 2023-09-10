@@ -1,16 +1,111 @@
 import 'package:flutter/material.dart';
+import 'package:shrine/login.dart';
 
 import 'model/product.dart';
+import 'login.dart';
 
 const double _kFlingVelocity = 2.0;
 
-// TODO: Add velocity constant (104)
+class _backdropTitle extends AnimatedWidget {
+  final void Function() onPress;
+  final Widget frontTitle;
+  final Widget backTitle;
+
+  const _backdropTitle({
+    Key? key,
+    required Animation<double> listenable,
+    required this.onPress,
+    required this.frontTitle,
+    required this.backTitle,
+  })  : _listenable = listenable,
+        super(key: key, listenable: listenable);
+
+  final Animation<double> _listenable;
+
+  @override
+  Widget build(BuildContext context) {
+    final Animation<double> animation = _listenable;
+
+    return DefaultTextStyle(
+        style: Theme.of(context).textTheme.headlineLarge!,
+        softWrap: false,
+        overflow: TextOverflow.ellipsis,
+        child: Row(
+          children: [
+            SizedBox(
+              width: 72.0,
+              child: IconButton(
+                padding: const EdgeInsets.only(right: 8.0),
+                onPressed: this.onPress,
+                icon: Stack(children: [
+                  Opacity(
+                    opacity: animation.value,
+                    child:
+                        const ImageIcon(AssetImage('assets/slanted_menu.png')),
+                  ),
+                  FractionalTranslation(
+                    translation: Tween<Offset>(
+                      begin: Offset.zero,
+                      end: const Offset(1.0, 0.0),
+                    ).evaluate(animation),
+                    child: const ImageIcon(AssetImage('assets/diamond.png')),
+                  )
+                ]),
+              ),
+            ),
+// koko
+            Stack(
+              children: [
+                Opacity(
+                  opacity: CurvedAnimation(
+                    parent: ReverseAnimation(animation),
+                    curve: const Interval(0.5, 1.0),
+                  ).value,
+                  child: FractionalTranslation(
+                    translation: Tween(
+                      begin: Offset.zero,
+                      end: const Offset(0.5, 0.0),
+                    ).evaluate(animation),
+                    child: backTitle,
+                  ),
+                ),
+                Opacity(
+                  opacity: CurvedAnimation(
+                    parent: animation,
+                    curve: const Interval(0.5, 1.0),
+                  ).value,
+                  child: FractionalTranslation(
+                    translation: Tween(
+                      begin: const Offset(-0.25, 0.0),
+                      end: Offset.zero,
+                    ).evaluate(animation),
+                    child: frontTitle,
+                  ),
+                ),
+              ],
+            )
+          ],
+        ));
+  }
+}
+
 class _BackdropState extends State<Backdrop>
     with SingleTickerProviderStateMixin {
   final GlobalKey _backdropKey = GlobalKey(debugLabel: 'Backdrop');
   late AnimationController _controller;
   // TODO: Add AnimationController widget (104)
   // TODO: Add override for didUpdateWidget (104)
+
+  @override
+  void didUpdateWidget(Backdrop old) {
+    super.didUpdateWidget(old);
+
+    if (widget.currentCategory != old.currentCategory) {
+      _toggleBackdropLayerVisibility();
+    } else if (!_FrontLayerVisible) {
+      _controller.fling(velocity: _kFlingVelocity);
+    }
+  }
 
   @override
   void initState() {
@@ -28,7 +123,6 @@ class _BackdropState extends State<Backdrop>
     super.dispose();
   }
 
-  // TODO: Add functions to get and change front layer visibility (104)
   bool get _FrontLayerVisible {
     final AnimationStatus status = _controller.status;
     return status == AnimationStatus.completed ||
@@ -44,7 +138,6 @@ class _BackdropState extends State<Backdrop>
     const double layerTitleHeight = 48.0;
     final Size layerSize = constraints.biggest;
     final double layerTop = layerSize.height - layerTitleHeight;
-    // TODO: Create a RelativeRectTween Animation (104)
 
     Animation<RelativeRect> layerAnimation = RelativeRectTween(
       begin: RelativeRect.fromLTRB(
@@ -62,7 +155,10 @@ class _BackdropState extends State<Backdrop>
         ),
         PositionedTransition(
           rect: layerAnimation,
-          child: _FrontLayer(child: widget.frontLayer),
+          child: _FrontLayer(
+            child: widget.frontLayer,
+            onTap: _toggleBackdropLayerVisibility,
+          ),
         ),
       ],
     );
@@ -73,29 +169,35 @@ class _BackdropState extends State<Backdrop>
     var appBar = AppBar(
       elevation: 0.0,
       titleSpacing: 0.0,
-      leading: IconButton(
-        icon: const Icon(Icons.menu),
-        onPressed: _toggleBackdropLayerVisibility,
-      ),
-      title: Text('SHRINE'),
+      title: _backdropTitle(
+          listenable: _controller.view,
+          onPress: _toggleBackdropLayerVisibility,
+          frontTitle: widget.frontTitle,
+          backTitle: widget.backTitle),
       actions: [
         IconButton(
-          onPressed: () {
-            print('test');
-          },
           icon: const Icon(
             Icons.search,
-            semanticLabel: 'search',
+            semanticLabel: 'login',
           ),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (BuildContext context) => LoginPage()),
+            );
+          },
         ),
         IconButton(
-          onPressed: () {
-            print('object');
-          },
           icon: const Icon(
             Icons.tune,
-            semanticLabel: 'filter',
+            semanticLabel: 'login',
           ),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (BuildContext context) => LoginPage()),
+            );
+          },
         )
       ],
     );
@@ -109,9 +211,11 @@ class _BackdropState extends State<Backdrop>
 class _FrontLayer extends StatelessWidget {
   const _FrontLayer({
     Key? key,
+    this.onTap,
     required this.child,
   }) : super(key: key);
 
+  final VoidCallback? onTap;
   final Widget child;
 
   @override
@@ -124,6 +228,14 @@ class _FrontLayer extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onTap,
+            child: Container(
+              height: 40.0,
+              alignment: AlignmentDirectional.centerStart,
+            ),
+          ),
           Expanded(child: child),
         ],
       ),
@@ -150,7 +262,3 @@ class Backdrop extends StatefulWidget {
   @override
   _BackdropState createState() => _BackdropState();
 }
-
-// TODO: Add _FrontLayer class (104)
-// TODO: Add _BackdropTitle class (104)
-// TODO: Add _BackdropState class (104)
